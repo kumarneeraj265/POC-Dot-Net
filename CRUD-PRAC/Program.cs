@@ -3,8 +3,10 @@ using CRUD_PRAC.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Stripe;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 var provider = builder.Services.BuildServiceProvider();
@@ -35,13 +37,23 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1"
     });
 });
+builder.Services.AddSwaggerGenNewtonsoftSupport();
 builder.Services.AddAutoMapper(typeof(Program));
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IAvailablityService, AvailablityService>();
 builder.Services.AddScoped<IStripePayService, StripePayService>();
-object value = builder.Services.AddControllers().AddNewtonsoftJson(options =>
-    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
-);
+builder.Services.AddControllers().AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.Converters.
+           Add(new JsonStringEnumConverter());
+
+    options.JsonSerializerOptions.DefaultIgnoreCondition =
+             JsonIgnoreCondition.WhenWritingNull;
+});
+
+//object value = builder.Services.AddControllers().AddNewtonsoftJson(options =>
+//    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore
+//);
 
 var app = builder.Build();
 StripeConfiguration.ApiKey = "sk_test_51KUSexH97OQctAcHwgEDd46ge4T69VcUXANs39P63tYcjkEnMBe8qyzqVCiJoZxsjOoClCTfMiCLThqIUr5jgPcE00KP4Y9Fqx"; // "sk_test_tR3PYbcVNZZ796tH88S4VQ2u";

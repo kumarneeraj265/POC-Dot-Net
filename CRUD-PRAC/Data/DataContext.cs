@@ -10,7 +10,7 @@ namespace CRUD_PRAC.Data
 
         }
 
-        public DbSet<Member> Players { get; set; }
-        public DbSet<Availablity> Availablities { get; set; }
+        public DbSet<Member> TempPlayers { get; set; }
+        public DbSet<Availablity> TempAvailablities { get; set; }
     }
 }

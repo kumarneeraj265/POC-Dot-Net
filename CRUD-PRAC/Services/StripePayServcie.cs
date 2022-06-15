@@ -36,7 +36,16 @@ namespace CRUD_PRAC.Services
             // Replace this constant with a calculation of the order's amount
             // Calculate the order total on the server to prevent
             // people from directly manipulating the amount on the client
-            return 500;
+            var amtToPay = 1;
+            if (items.Any()) {
+                if (items.Count() > 1) { 
+                    amtToPay = 1500;
+                }else if (items.Count() > 0)
+                {
+                    amtToPay = items[0].Id == "1" ? 1000 : 500;
+                }
+            }
+            return amtToPay;
         }
 
         public async Task<ServiceResponse<PaymentIntentDTO>> CreatePayementIntent(int playerId, PaymentIntentCreateRequest request)
@@ -49,8 +58,9 @@ namespace CRUD_PRAC.Services
                 Customer customer = null;
                 //FuturePaymentIntentModel setupIntent = new FuturePaymentIntentModel();
                 var paymentIntentOptions = new PaymentIntentCreateOptions();
-                Member playerData = await _context.Players.Where(player => player.Id == playerId)
-                    .FirstOrDefaultAsync();
+                var playerData = await _context.TempPlayers.Where(player => player.Id == playerId)
+                    .FirstOrDefaultAsync(
+                    );
                 if (playerData != null)
                 {
                     if (request.isSaveCard)
@@ -70,35 +80,33 @@ namespace CRUD_PRAC.Services
 
                             //update stripe cust Id in own db records
                             playerData.StripeCustId = customer?.Id;
-                            _context.Players.Attach(playerData);
+                            _context.TempPlayers.Attach(playerData);
                             _context.Entry(playerData).Property(x => x.StripeCustId).IsModified = true;
                             _context.SaveChanges();
                         }
-                       
+
 
                     }
 
-                    if (request.isSaveCard || request.paymentMethodId != null) {
-                        paymentIntentOptions = new PaymentIntentCreateOptions
-                        {
-                            Amount = CalculateOrderAmount(request.Items),
-                            Currency = "usd",
-                            Customer = playerData?.StripeCustId,
-                            SetupFutureUsage = "off_session",
-                            PaymentMethod = request.paymentMethodId != null ? request.paymentMethodId : null,
-                            PaymentMethodTypes = new List<string> {
-                          "card",
-                         },
-                        };
-                    } else {
-                        paymentIntentOptions = new PaymentIntentCreateOptions
-                        {
-                            Amount = CalculateOrderAmount(request.Items),
-                            Currency = "usd",
-                            PaymentMethodTypes = new List<string> {
+
+                    paymentIntentOptions = new PaymentIntentCreateOptions
+                    {
+                        Amount = CalculateOrderAmount(request.Items),
+                        Currency = "usd",
+                        PaymentMethodTypes = new List<string> {
                               "card",
                              },
-                        };
+                    };
+
+                    if (request.isSaveCard)
+                    {
+                        paymentIntentOptions.Customer = playerData?.StripeCustId;
+                        paymentIntentOptions.SetupFutureUsage = "off_session";
+                       
+                    }
+                    else if (request.paymentMethodId != null) {
+                        paymentIntentOptions.PaymentMethod = request.paymentMethodId != null ? request.paymentMethodId : null;
+
                     }
 
                     var paymentIntent = paymentIntentService.Create(paymentIntentOptions);
@@ -106,7 +114,8 @@ namespace CRUD_PRAC.Services
                     serviceResponse.Message = "Payment Intent created";
                     return serviceResponse;
                 }
-                else {
+                else
+                {
                     return serviceResponse;
                 }
             }
@@ -151,10 +160,10 @@ namespace CRUD_PRAC.Services
 
 
             // just for the POC purpose we are making this query to fetch the cust id of stripe
-            Member playerData = await _context.Players.Where(player => player.Id == playerId)
-                    .FirstOrDefaultAsync();
+            var playerData = await _context.TempPlayers.Where(player => player.Id == playerId)
+                    .FirstOrDefaultAsync(p=> p.StripeCustId != null);
 
-            if (playerData != null && playerData.StripeCustId != null) {
+            if (playerData != null) {
                 CustomerModel customer = await GetCustomerByEmail(playerData.Email);
                 if (customer != null)
                 {
@@ -165,7 +174,7 @@ namespace CRUD_PRAC.Services
                 }
                 {
                     serviceResponse.Data = paymentMethods;
-                    serviceResponse.Message = "No Data exists for Player Id" + playerData.Id;
+                    serviceResponse.Message = "No data found against Player Id" + playerData.Id;
                     return serviceResponse;
                 }
             }

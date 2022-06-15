@@ -48,7 +48,7 @@ namespace CRUD_PRAC.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Availablities");
+                    b.ToTable("TempAvailablities");
                 });
 
             modelBuilder.Entity("CRUD_PRAC.Models.Member", b =>
@@ -60,6 +60,7 @@ namespace CRUD_PRAC.Migrations
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
                     b.Property<string>("Email")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
@@ -76,7 +77,7 @@ namespace CRUD_PRAC.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Players");
+                    b.ToTable("TempPlayers");
                 });
 #pragma warning restore 612, 618
         }

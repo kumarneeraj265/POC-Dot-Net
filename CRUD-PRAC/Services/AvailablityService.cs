@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CRUD_PRAC.Constants;
 using CRUD_PRAC.Data;
 using CRUD_PRAC.DTOs.AvailablityDTO;
 using CRUD_PRAC.DTOs.UserDTO;
@@ -48,18 +49,18 @@ namespace CRUD_PRAC.Services
                     mapped.Slot = item.ToString();
 
 
-                    var availablitiesRec = await _context.Availablities.Where(row => row.PlayerId == newAvailablity.PlayerId).ToArrayAsync();
+                    var availablitiesRec = await _context.TempAvailablities.Where(row => row.PlayerId == newAvailablity.PlayerId).ToArrayAsync();
 
                     if (availablitiesRec.Length > 0)
                     {
-                        _context.Availablities.RemoveRange(availablitiesRec);
+                        _context.TempAvailablities.RemoveRange(availablitiesRec);
                         serviceResponse.Message = "Availablity updated successfully";
                     }
                     else
                     {
                         serviceResponse.Message = "Availablity saved successfully";
                     }
-                    _context.Availablities.Add(mapped);
+                    _context.TempAvailablities.Add(mapped);
                 }
             }
 
@@ -75,45 +76,48 @@ namespace CRUD_PRAC.Services
 
             try
             {
-                var playerAvailablities = await _context.Availablities.Where(x => x.PlayerId == playerId).ToListAsync();
-                var playerDetail = await _context.Players.FirstOrDefaultAsync(x => x.Id == playerId);
+                var playerAvailablities = await _context.TempAvailablities.Where(x => x.PlayerId == playerId).ToListAsync();
+                var playerDetail = await _context.TempPlayers.FirstOrDefaultAsync(x => x.Id == playerId);
 
-                // prepare player details with availablities object
-                AvailablityDTO availDto = new AvailablityDTO();
-                List<Slots> newplayerSLot = new List<Slots>();
+                if (playerDetail != null) { 
+                    // prepare player details with availablities object
+                    AvailablityDTO availDto = new AvailablityDTO();
+                    List<Slots> newplayerSLot = new List<Slots>();
 
-                availDto.PlayerId = playerId;
-                availDto.Name = playerDetail.Name;
-                availDto.Email = playerDetail.Email;
+                    availDto.PlayerId = playerId;
+                    availDto.Name = playerDetail.Name;
+                    availDto.Email = playerDetail.Email;
 
-                var newSlotList = playerAvailablities.Select(x => x.Day).Distinct().ToList();
-                foreach (var day in newSlotList)
-                {
-                    Slots newSlot = new Slots();
-                    newSlot.Day = day;
-                    var allSlots = playerAvailablities.Where(x => x.Day == day).Select(x => x.Slot).ToList();
-                    List<Slot> newSlotPlayerList = new List<Slot>();
-                    foreach (var slot in allSlots)
+                    var newSlotList = playerAvailablities.Select(x => x.Day).Distinct().ToList();
+                    foreach (var day in newSlotList)
                     {
-                        var sloDetails = CheckEnumSlot(slot);
-                        newSlotPlayerList.Add(sloDetails);
+                        Slots newSlot = new Slots();
+                        newSlot.Day = day;
+                        var allSlots = playerAvailablities.Where(x => x.Day == day).Select(x => x.Slot).ToList();
+                        List<Slot> newSlotPlayerList = new List<Slot>();
+                        foreach (var slot in allSlots)
+                        {
+                            var sloDetails = CheckEnumSlot(slot);
+                            newSlotPlayerList.Add(sloDetails);
+                        }
+                        newSlot.Slot = newSlotPlayerList;
+                        newplayerSLot.Add(newSlot);
                     }
-                    newSlot.Slot = newSlotPlayerList;
-                    newplayerSLot.Add(newSlot);
-                }
-                availDto.Availablity = newplayerSLot;
+                    availDto.Availablity = newplayerSLot;
 
 
-                if (availDto != null)
-                {
-                    serviceResponse.Data = availDto;
-                    serviceResponse.Message = "Data Found";
+                    if (availDto != null)
+                    {
+                        serviceResponse.Data = availDto;
+                        serviceResponse.Message = "Data Found";
 
-                }
-                else
-                {
-                    serviceResponse.Data = null;
-                    serviceResponse.Message = "No Data Found !";
+                    }
+                    else
+                    {
+                        serviceResponse.Data = null;
+                        serviceResponse.Message = "No Data Found !";
+                    }
+
                 }
 
                 return serviceResponse;
@@ -131,8 +135,8 @@ namespace CRUD_PRAC.Services
             var serviceResponse = new ServiceResponse<FetchedPlayersList>();
             try
             {
-                var playerAvailablities = await _context.Availablities.Where(x => playerIds.Contains(x.PlayerId)).ToListAsync();
-                var playerDetails = await _context.Players.Where(x => playerIds.Contains(x.Id)).ToListAsync();
+                var playerAvailablities = await _context.TempAvailablities.Where(x => playerIds.Contains(x.PlayerId)).ToListAsync();
+                var playerDetails = await _context.TempPlayers.Where(x => playerIds.Contains(x.Id)).ToListAsync();
 
                 //var pData = await _context.Users.Join(
                 //                _context.Availablities,

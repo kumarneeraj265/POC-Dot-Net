@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "Qy+QjsguSWxuJnu7dMeh+vsENWpoBuGkj6S0eFy2I1ESd54axAS4GZ0kabc23JrsyPMhFC0FLTdJaT7pGAKang==",
+  "dgSpecHash": "Qv2fblQ9MQ7uO/kylOkw9Un+AZqOpzvDFAL0xspkBPmHeQ+TkUgyb/fFVqqjCHkHgybm08TYc3BWWqDbTHoUBA==",
   "success": true,
   "projectFilePath": "D:\\dont-net-core-base\\CRUD-PRAC-AutoMaper\\CRUD-PRAC\\CRUD-PRAC.csproj",
   "expectedPackageFiles": [
@@ -42,8 +42,9 @@
     "C:\\Users\\neeraj\\.nuget\\packages\\newtonsoft.json.bson\\1.0.2\\newtonsoft.json.bson.1.0.2.nupkg.sha512",
     "C:\\Users\\neeraj\\.nuget\\packages\\stripe.net\\39.117.0\\stripe.net.39.117.0.nupkg.sha512",
     "C:\\Users\\neeraj\\.nuget\\packages\\swashbuckle.aspnetcore\\6.2.3\\swashbuckle.aspnetcore.6.2.3.nupkg.sha512",
-    "C:\\Users\\neeraj\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.2.3\\swashbuckle.aspnetcore.swagger.6.2.3.nupkg.sha512",
-    "C:\\Users\\neeraj\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.2.3\\swashbuckle.aspnetcore.swaggergen.6.2.3.nupkg.sha512",
+    "C:\\Users\\neeraj\\.nuget\\packages\\swashbuckle.aspnetcore.newtonsoft\\6.3.1\\swashbuckle.aspnetcore.newtonsoft.6.3.1.nupkg.sha512",
+    "C:\\Users\\neeraj\\.nuget\\packages\\swashbuckle.aspnetcore.swagger\\6.3.1\\swashbuckle.aspnetcore.swagger.6.3.1.nupkg.sha512",
+    "C:\\Users\\neeraj\\.nuget\\packages\\swashbuckle.aspnetcore.swaggergen\\6.3.1\\swashbuckle.aspnetcore.swaggergen.6.3.1.nupkg.sha512",
     "C:\\Users\\neeraj\\.nuget\\packages\\swashbuckle.aspnetcore.swaggerui\\6.2.3\\swashbuckle.aspnetcore.swaggerui.6.2.3.nupkg.sha512",
     "C:\\Users\\neeraj\\.nuget\\packages\\system.collections.immutable\\6.0.0\\system.collections.immutable.6.0.0.nupkg.sha512",
     "C:\\Users\\neeraj\\.nuget\\packages\\system.configuration.configurationmanager\\6.0.0\\system.configuration.configurationmanager.6.0.0.nupkg.sha512",

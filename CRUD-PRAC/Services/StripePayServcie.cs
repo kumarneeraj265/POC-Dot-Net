@@ -36,7 +36,7 @@ namespace CRUD_PRAC.Services
             // Replace this constant with a calculation of the order's amount
             // Calculate the order total on the server to prevent
             // people from directly manipulating the amount on the client
-            var amtToPay = 10;
+            var amtToPay = 100;
             //if (items.Any()) {
             //    if (items.Count() > 1) { 
             //        amtToPay = 1500;
@@ -164,17 +164,16 @@ namespace CRUD_PRAC.Services
                     .FirstOrDefaultAsync(p=> p.StripeCustId != null);
 
             if (playerData != null) {
-                CustomerModel customer = await GetCustomerByEmail(playerData.Email);
-                if (customer != null)
+                if (playerData?.StripeCustId != null)
                 {
-                    var response = await this.GetPaymentMethods(customer.Id, paymentMethodType);
+                    var response = await this.GetPaymentMethods(playerData.StripeCustId, paymentMethodType);
                     paymentMethods.AddRange(response);
                     serviceResponse.Data = paymentMethods;
                     return serviceResponse;
                 }
                 {
                     serviceResponse.Data = paymentMethods;
-                    serviceResponse.Message = "No data found against Player Id" + playerData.Id;
+                    serviceResponse.Message = "No data found against Player Id" + playerData?.Id;
                     return serviceResponse;
                 }
             }

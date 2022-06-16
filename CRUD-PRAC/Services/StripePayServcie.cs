@@ -36,15 +36,15 @@ namespace CRUD_PRAC.Services
             // Replace this constant with a calculation of the order's amount
             // Calculate the order total on the server to prevent
             // people from directly manipulating the amount on the client
-            var amtToPay = 1;
-            if (items.Any()) {
-                if (items.Count() > 1) { 
-                    amtToPay = 1500;
-                }else if (items.Count() > 0)
-                {
-                    amtToPay = items[0].Id == "1" ? 1000 : 500;
-                }
-            }
+            var amtToPay = 10;
+            //if (items.Any()) {
+            //    if (items.Count() > 1) { 
+            //        amtToPay = 1500;
+            //    }else if (items.Count() > 0)
+            //    {
+            //        amtToPay = items[0].Id == "1" ? 1000 : 500;
+            //    }
+            //}
             return amtToPay;
         }
 

@@ -27,10 +27,23 @@ namespace CRUD_PRAC.Controllers
 
 
         [HttpGet("get-payment-method")]
-        public async Task<ActionResult<ServiceResponse<List<PaymentMethodModel>>>>GetPaymentMethodsByCustomerEmail(int playerId)
+        public async Task<ActionResult<ServiceResponse<List<PaymentMethodModel>>>> GetPaymentMethodsById(int playerId)
         {
-            return Ok(await _stripePayService.GetPaymentMethodsByCustomerEmail(playerId, PaymentMethodType.Card));
+            return Ok(await _stripePayService.GetPaymentMethodsById(playerId, PaymentMethodType.Card));
         }
+
+        [HttpGet("attach-payment-method")]
+        public async Task<ActionResult<ServiceResponse<List<PaymentMethodModel>>>> AttachPaymentMethod(int playerId, string paymentMethodId, bool makeDefault)
+        {
+            return Ok(await _stripePayService.AttachPaymentMethod(playerId, paymentMethodId, makeDefault));
+        }
+
+        [HttpGet("detach-payment-method")]
+        public async Task<ActionResult<bool>> DeletePaymentMethod(string paymentMethodId)
+        {
+            return Ok(await _stripePayService.DeletePaymentMethod(paymentMethodId));
+        }
+
 
 
 

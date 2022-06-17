@@ -17,7 +17,8 @@ namespace CRUD_PRAC.Services
         /// <returns></returns>
         Task<FuturePaymentIntentModel> PrepareForFuturePayment(string customerId);
         Task<List<PaymentMethodModel>> GetPaymentMethods(string customerId, PaymentMethodType paymentMethodType);
-        Task<ServiceResponse<List<PaymentMethodModel>>> GetPaymentMethodsByCustomerEmail(int playerId, PaymentMethodType paymentMethodType);
-      
+        Task<ServiceResponse<List<PaymentMethodModel>>> GetPaymentMethodsById(int playerId, PaymentMethodType paymentMethodType);
+        Task<ServiceResponse<List<PaymentMethodModel>>> AttachPaymentMethod(int playerId, string paymentMethodId, bool makeDefault);
+        Task<bool> DeletePaymentMethod(string paymentMethodId);
     }
 }

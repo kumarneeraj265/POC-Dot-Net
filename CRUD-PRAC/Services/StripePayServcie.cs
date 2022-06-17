@@ -29,6 +29,56 @@ namespace CRUD_PRAC.Services
             return custDetails;
 
         }
+        public async Task<PaymentMethodModel> AddPaymentMethod(string customerId, string paymentMethodId, bool makeDefault) {
+
+            var options = new PaymentMethodAttachOptions
+            {
+                Customer = customerId,
+            };
+            var service = new PaymentMethodService();
+            var stripePaymentMethod = await service.AttachAsync(paymentMethodId, options);
+
+            if (makeDefault)
+            {
+                // Update customer's default invoice payment method
+                var customerOptions = new CustomerUpdateOptions
+                {
+                    InvoiceSettings = new CustomerInvoiceSettingsOptions
+                    {
+                        DefaultPaymentMethod = stripePaymentMethod.Id,
+                    },
+                };
+                var customerService = new CustomerService();
+                await customerService.UpdateAsync(customerId, customerOptions);
+            }
+
+            PaymentMethodModel result = new PaymentMethodModel(stripePaymentMethod.Id);
+
+            if (!Enum.TryParse(stripePaymentMethod.Type, true, out PaymentMethodType paymentMethodType))
+            {
+                // this._logger.LogError($"Cannot recognize PAYMENT_METHOD_TYPE:{stripePaymentMethod.Type}");
+            }
+            result.Type = paymentMethodType;
+
+            if (result.Type == PaymentMethodType.Card)
+            {
+                result.Card = new PaymentMethodCardModel()
+                {
+                    Brand = stripePaymentMethod.Card.Brand,
+                    Country = stripePaymentMethod.Card.Country,
+                    ExpMonth = stripePaymentMethod.Card.ExpMonth,
+                    ExpYear = stripePaymentMethod.Card.ExpYear,
+                    Issuer = stripePaymentMethod.Card.Issuer,
+                    Last4 = stripePaymentMethod.Card.Last4,
+                    Description = stripePaymentMethod.Card.Description,
+                    Fingerprint = stripePaymentMethod.Card.Fingerprint,
+                    Funding = stripePaymentMethod.Card.Funding,
+                    Iin = stripePaymentMethod.Card.Iin
+                };
+            }
+
+            return result;
+        }
 
         private int CalculateOrderAmount(Item[] items)
         {
@@ -152,7 +202,7 @@ namespace CRUD_PRAC.Services
         }
 
 
-        public async Task<ServiceResponse<List<PaymentMethodModel>>> GetPaymentMethodsByCustomerEmail(int playerId, PaymentMethodType paymentMethodType)
+        public async Task<ServiceResponse<List<PaymentMethodModel>>> GetPaymentMethodsById(int playerId, PaymentMethodType paymentMethodType)
         {
             var serviceResponse = new ServiceResponse<List<PaymentMethodModel>>();
             List<PaymentMethodModel> paymentMethods = new List<PaymentMethodModel>();
@@ -166,7 +216,7 @@ namespace CRUD_PRAC.Services
             if (playerData != null) {
                 if (playerData?.StripeCustId != null)
                 {
-                    var response = await this.GetPaymentMethods(playerData.StripeCustId, paymentMethodType);
+                    var response = await GetPaymentMethods(playerData.StripeCustId, paymentMethodType);
                     paymentMethods.AddRange(response);
                     serviceResponse.Data = paymentMethods;
                     return serviceResponse;
@@ -259,5 +309,72 @@ namespace CRUD_PRAC.Services
 
             return customerModel;
         }
-     }
+
+        public async Task<ServiceResponse<List<PaymentMethodModel>>> AttachPaymentMethod(int playerId, string paymentMethodId, bool makeDefault = true)
+        {
+            try
+            {
+                var serviceResponse = new ServiceResponse<List<PaymentMethodModel>>();
+                List<PaymentMethodModel> paymentMethods = new List<PaymentMethodModel>();
+                Customer customer = null;
+                // just for the POC purpose we are making this query to fetch the cust id of stripe
+                var playerData = await _context.TempPlayers.Where(player => player.Id == playerId)
+                        .FirstOrDefaultAsync(p => p.StripeCustId != null);
+
+                if (playerData != null)
+                {
+                    if (playerData?.StripeCustId == null)
+                    {
+
+                        //if stripe customer data not exists in db
+                        var cust = new CustomerCreateOptions
+                        {
+                            Description = "Test Customer by neeraj",
+                            Name = playerData?.Name,
+                            Email = playerData?.Email,
+                        };
+
+                        customer = AddCustomer(cust);
+
+                        //update stripe cust Id in own db records
+                        playerData.StripeCustId = customer?.Id;
+                        _context.TempPlayers.Attach(playerData);
+                        _context.Entry(playerData).Property(x => x.StripeCustId).IsModified = true;
+                        _context.SaveChanges();
+                    }
+                    
+                    if (playerData?.StripeCustId != null)
+                    {
+                        PaymentMethodModel response = await AddPaymentMethod(playerData?.StripeCustId, paymentMethodId, makeDefault);
+                        paymentMethods.Add(response);
+                        serviceResponse.Data = paymentMethods;
+                        serviceResponse.Message = "Payment method attached against provide player details";
+                    }
+                    
+                }
+                else {
+                    serviceResponse.Message = "No data found against Player Id" + playerId;
+                }
+                return serviceResponse;
+            }
+            catch (StripeException se)
+            {
+                //this._logger.LogError($"An error occured during attach of PAYMENT_METHOD:{paymentMethodId} for CUSTOMER:{customerId}, {se}");
+            }
+            catch (Exception ex)
+            {
+                //this._logger.LogError($"An error occured during attach of PAYMENT_METHOD:{paymentMethodId} for CUSTOMER:{customerId}, {ex}");
+            }
+            return null;
+        }
+
+        public async Task<bool> DeletePaymentMethod(string paymentMethodId)
+        {
+            var service = new PaymentMethodService();
+            var paymentMethod = await service.DetachAsync(paymentMethodId);
+            return paymentMethod != null ;
+
+        }
+
+    }
 }

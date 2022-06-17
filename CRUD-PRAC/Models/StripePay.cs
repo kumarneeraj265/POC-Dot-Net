@@ -18,6 +18,6 @@ namespace CRUD_PRAC.Models
         public Item[] Items { get; set; }
 
         public string? paymentMethodId { get; set; }
-        public bool isSaveCard { get; set; }
+        public bool isSaveCard { get; set; } = false;
     }
 }
